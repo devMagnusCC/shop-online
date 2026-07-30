@@ -1,0 +1,51 @@
+{
+  "produtos": [
+    {
+      "id": "09f56463-bae0-4cd5-b169-97b97fb2ad16",
+      "nome": "Nintendo Switch",
+      "descricao": "O que você precisa saber sobre este produto\n\n    Capacidade: 32 GB.\n    Processador Nvidia Tegra com 8 núcleos e velocidade de 1.02 GHz.\n    Memória RAM LPDDR4 de 4 GB para desempenho otimizado.\n    Tela de 5,5&#x27;&#x27; com função tátil para experiência interativa.\n    Controles integrados facilitam o manuseio em jogos.\n    Conexões Bluetooth e USB para acessórios e periféricos.\n    Design compacto e leve ideal para jogos em qualquer lugar.",
+      "preco": 1374.23,
+      "imagens": [
+        "/uploads/75b9523f-0621-4a29-880e-2f1929b6a19a.png"
+      ],
+      "linkCompra": "https://www.mercadolivre.com.br/console-nintendo-switch-lite-32gb-azul-turquesa-standard-tela-55-cor-azul-turquesa/p/MLB40199765?pdp_filters=item_id%3AMLB5322766386&from=gshop&matt_tool=31485049&matt_word=&matt_source=google&matt_campaign_id=22090354244&matt_ad_group_id=195616642768&matt_match_type=&matt_network=g&matt_device=c&matt_creative=787871503103&matt_keyword=&matt_ad_position=&matt_ad_type=pla&matt_merchant_id=735098660&matt_product_id=MLB40199765-product&matt_product_partition_id=2509829503087&matt_target_id=pla-2509829503087&cq_src=google_ads&cq_cmp=22090354244&cq_net=g&cq_plt=gp&cq_med=pla&gad_source=1&gad_campaignid=22090354244&gclid=CjwKCAjwpqHTBhAcEiwAj2AfutzTnha6ZilaiV_y86GipdIUWzsvyby_FCOiPgHK10hVz1iOvkiSiRoCCo8QAvD_BwE",
+      "createdAt": "2026-07-28T20:27:33.939Z",
+      "updatedAt": "2026-07-30T20:17:34.648Z",
+      "midias": [
+        "/uploads/82b7a160-3bbf-4de7-ba2c-395aba245102.webp"
+      ],
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "04fef6a2-c6df-4a14-80d6-f882b12963db",
+      "nome": "Notebook Acer Aspire Go 15 AG15-71P-5939 - Intel Core i5-13420H 13ª Geração • 8GB DDR5 • 256GB SSD NVMe • Tela 15,6 • Windows 11 Home",
+      "descricao": "O que você precisa saber sobre este produto\n\n    Modelo de placa gráfica integrada: UHD Graphis.\n    Linha de placa gráfica integrada: INTELG.\n    Marca de placa gráfica integrada: intel.\n    Taxa de atualização da tela: 60 Hz.\n    Processador: Intel Core i5 Intel Core i5-13420H.\n    Versão do sistema operacional: Windows 11.\n    Edição do sistema operacional: Home.\n    Nome do sistema operacional: Windows.\n    Capacidade de disco SSD: 256 GB.\n    Capacidade total do módulo de memória RAM: 8 GB.\n    Com tela tátil: Não.\n    Resolução da tela: 1920 px x 1080 px.\n    Conexão Wi-Fi e bluetooth.",
+      "preco": 3465,
+      "imagens": [
+        "/uploads/8b8af9cd-9f53-4006-8b13-85d266851732.webp",
+        "/uploads/2cb20ce6-276e-4f78-b054-b8f5762a2d09.webp"
+      ],
+      "linkCompra": "https://www.mercadolivre.com.br/notebook-acer-aspire-go-15-ag15-71p-5939-intel-core-i5-13420h-13-geracao-8gb-ddr5-256gb-ssd-nvme-tela-156-windows-11-home/p/MLB52934530?matt_event_ts=1785273506912&matt_d2id=7915f034-2580-4071-96af-d4a30892b8d7&matt_tracing_id=74ebfcc2-97d7-4a62-836e-508a40090920#polycard_client=recommendations_home_affiliate-profile&reco_backend=item_decorator&reco_client=home_affiliate-profile&matt_tool_id=98006662&reco_item_pos=0&source=affiliate-profile&reco_backend_type=function&reco_id=dcc3d285-db38-4ed0-b6ac-8b44666ec570&tracking_id=0492b7a7-0613-4511-901e-defe15d0fdbf&wid=MLB6551643234&sid=recos&c_id=/home/card-featured/element&c_uid=51d8d893-6131-453c-9204-7876d6916015",
+      "createdAt": "2026-07-28T21:20:43.300Z",
+      "updatedAt": "2026-07-30T20:17:40.103Z",
+      "midias": [
+        "/uploads/8b8af9cd-9f53-4006-8b13-85d266851732.webp",
+        "/uploads/2cb20ce6-276e-4f78-b054-b8f5762a2d09.webp"
+      ],
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "08b44366-70ff-4dcd-8304-efccdd020112",
+      "nome": "ROMANTIC CROWN Copo Térmico Inox Portátil 1200ml/600ml/1.2L Garrafa Térmica Inoxidável com Tampa e Canudo",
+      "descricao": "Romantic Crown Copo Térmico é o presente perfeito para bons amigos, familiares, amantes, colegas, vizinhos e parceiros de negócios, especialmente para aqueles que precisam manter uma boa hidratação ou que têm dificuldade em se reabastecer. Seja no Dia dos Namorados, Dia das Mães, Dia dos Pais, Natal, Ação de Graças, Páscoa ou aniversários, este copo é uma escolha excelente, permitindo que você expresse carinho e amor em datas especiais.",
+      "preco": 49.38,
+      "midias": [
+        "/uploads/15634ff1-0a35-48c7-8c32-09b7b5af6c4e.webp"
+      ],
+      "categoria": "Cozinha",
+      "linkCompra": "https://shopee.com.br/product/1350045638/26980788215?exp_group=rollout&gads_t_sig=gqRjZGVrxHCFomtpsTE0MjUxOnRzc19zZGtfa2V5omt20QABpGFsZ2_SAAAAZKNkZWvAomN0xEAAAAAM_NxfHGgeczprZR4Q8tPoOfvwhbtN63JlB369xGJA1mbqBWuW2sVWxQjSJT_xT_mbG0_W5kumedB_GGTjqmNpcGhlcnRleHTEmQAAAAwZOVySu6N33GKdj87gQ21_kuVhxgN4xzEstzr6uvNYDCimWcVLCcHQFknkrQlAgLiD-8LN-pzG3ueOtzg82cCFGJEGQNZpi37mTcRPo4KmsaAQ4nbO8YSkC63pwDSScHN4yy67UVIlYYz1tBnA5TLY8r6MAvhZ42YspP-Iqkxmw-YHdK8zTlHdHGeRGjSsikTPX3wx5w&mmp_pid=an_18335510932&uls_trackid=56917pqj00k3&utm_campaign=id_0c5ddca622419585&utm_content=s1-s2-s3-s4-s5&utm_medium=affiliates&utm_source=an_18335510932&utm_term=favxu1zm354s",
+      "createdAt": "2026-07-30T20:48:12.700Z",
+      "updatedAt": "2026-07-30T20:56:18.999Z"
+    }
+  ]
+}
