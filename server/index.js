@@ -34,11 +34,14 @@ const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:5174,http:
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Origem não permitida pelo CORS'));
-    }
+    // Sem Origin (curl, server-to-server, mesmo domínio sem header) → aceita
+    if (!origin) return cb(null, true);
+
+    // Origem na lista explícita → aceita
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+
+    // Qualquer outra origem → bloqueia
+    cb(new Error('Origem não permitida pelo CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
