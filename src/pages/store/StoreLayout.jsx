@@ -1,26 +1,28 @@
 import { Link, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useFavoritos } from '../../context/FavoritosContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function StoreLayout() {
   const [search, setSearch] = useState('');
   const { favoritos } = useFavoritos();
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-gray-950">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 dark:bg-gray-900 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <img src="/logo.jpg" alt="Achadinhos Clubedodesconto" className="h-9 w-9 rounded-full object-cover" />
-              <span className="text-lg sm:text-xl font-bold text-gray-900 hidden sm:inline">Achadinhos clube do desconto</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900 hidden sm:inline dark:text-gray-100">Achadinhos clube do desconto</span>
             </Link>
 
             {/* Search */}
             <div className="flex-1 max-w-md">
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -30,14 +32,32 @@ export default function StoreLayout() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Pesquisar produtos..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm bg-gray-50"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                 />
               </div>
             </div>
 
+            {/* Toggle tema */}
+            <button
+              onClick={toggleTheme}
+              className="text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0 dark:text-gray-300 dark:hover:text-indigo-400"
+              aria-label={theme === 'dark' ? 'Usar modo claro' : 'Usar modo escuro'}
+              title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5m6.364 1.136l-1.06 1.06M21 12h-1.5m-1.136 6.364l-1.06-1.06M12 18.75V21m-4.773-4.227l-1.06 1.06M5.25 12H3.75m4.227-4.773L6.977 6.167M12 6.75a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+              )}
+            </button>
+
             <Link
               to="/favoritos"
-              className="text-sm text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 flex items-center gap-1"
+              className="text-sm text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 flex items-center gap-1 dark:text-gray-300"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -46,13 +66,13 @@ export default function StoreLayout() {
             </Link>
             <Link
               to="/ajuda"
-              className="text-sm text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0"
+              className="text-sm text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0 dark:text-gray-300 dark:hover:text-indigo-400"
             >
               Ajuda
             </Link>
             <Link
               to="/admin/login"
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 dark:text-gray-300 dark:hover:text-gray-400"
             >
               Admin
             </Link>
@@ -64,7 +84,7 @@ export default function StoreLayout() {
         <Outlet context={{ search, setSearch }} />
       </main>
 
-      <footer className="bg-white border-t border-gray-200 py-8 mt-12">
+      <footer className="bg-white border-t border-gray-200 py-8 mt-12 dark:bg-gray-900 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4">
           {/* Redes Sociais */}
           <div className="flex items-center gap-4">
@@ -72,7 +92,7 @@ export default function StoreLayout() {
               href="https://www.instagram.com/achadinhosclubedodesconto/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-pink-600 transition-colors"
+              className="text-gray-400 hover:text-pink-600 transition-colors dark:text-gray-500"
               title="Instagram"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -83,7 +103,7 @@ export default function StoreLayout() {
               href="https://chat.whatsapp.com/ENqmSrypxne61BHnyd5XwK"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-green-500 transition-colors"
+              className="text-gray-400 hover:text-green-500 transition-colors dark:text-gray-500"
               title="WhatsApp"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -91,7 +111,7 @@ export default function StoreLayout() {
               </svg>
             </a>
           </div>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
             &copy; {new Date().getFullYear()} Achadinhos Clubedodesconto. Todos os direitos reservados.
           </p>
         </div>

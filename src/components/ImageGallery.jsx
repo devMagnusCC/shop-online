@@ -17,7 +17,7 @@ export default function ImageGallery({ imagens = [], midias }) {
   return (
     <div>
       {/* Media principal */}
-      <div className="w-full max-h-[500px] rounded-xl overflow-hidden bg-gray-100 mb-3 flex items-center justify-center">
+      <div className="w-full max-h-[500px] rounded-xl overflow-hidden bg-gray-100 mb-3 flex items-center justify-center dark:bg-gray-800">
         {currentIsVideo ? (
           <video
             src={items[selected]}
@@ -31,7 +31,7 @@ export default function ImageGallery({ imagens = [], midias }) {
           <img
             src={items[selected]}
             alt="Produto"
-            className="w-full h-auto max-h-[500px] object-contain bg-white"
+            className="w-full h-auto max-h-[500px] object-contain bg-white dark:bg-gray-900"
           />
         )}
       </div>

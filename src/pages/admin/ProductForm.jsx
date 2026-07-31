@@ -97,10 +97,10 @@ export default function ProductForm() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {isEditing ? 'Editar Produto' : 'Novo Produto'}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
           {isEditing
             ? 'Altere os campos desejados e salve'
             : 'Preencha os dados para cadastrar um novo produto'}
@@ -109,19 +109,19 @@ export default function ProductForm() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border border-gray-200 p-6 space-y-5"
+        className="bg-white rounded-xl border border-gray-200 p-6 space-y-5 dark:bg-gray-900 dark:border-gray-800"
       >
         {/* Error message */}
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg border border-red-200">
+          <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg border border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-900">
             {error}
           </div>
         )}
 
         {/* Nome */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nome do Produto <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+            Nome do Produto <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             type="text"
@@ -129,18 +129,18 @@ export default function ProductForm() {
             value={form.nome}
             onChange={handleChange}
             placeholder="Ex: Camiseta Premium"
-            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm ${
-              fieldErrors.nome ? 'border-red-300 bg-red-50' : 'border-gray-300'
+            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm dark:text-gray-100 ${
+              fieldErrors.nome ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/30' : 'border-gray-300 dark:border-gray-700 dark:bg-gray-900'
             }`}
           />
           {fieldErrors.nome && (
-            <p className="text-red-500 text-xs mt-1">{fieldErrors.nome}</p>
+            <p className="text-red-500 text-xs mt-1 dark:text-red-400">{fieldErrors.nome}</p>
           )}
         </div>
 
         {/* Descrição */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Descrição
           </label>
           <textarea
@@ -149,20 +149,20 @@ export default function ProductForm() {
             onChange={handleChange}
             rows={4}
             placeholder="Descrição detalhada do produto..."
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm resize-vertical"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm resize-vertical dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
         </div>
 
         {/* Categoria */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Categoria
           </label>
           <select
             name="categoria"
             value={form.categoria}
             onChange={handleChange}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm bg-white"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm bg-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           >
             <option value="">Sem categoria</option>
             {CATEGORIAS.map((cat) => (
@@ -173,11 +173,11 @@ export default function ProductForm() {
 
         {/* Preço */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Preço <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+            Preço <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm dark:text-gray-500">
               R$
             </span>
             <input
@@ -188,20 +188,20 @@ export default function ProductForm() {
               step="0.01"
               min="0"
               placeholder="99,90"
-              className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm ${
-                fieldErrors.preco ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm dark:text-gray-100 ${
+                fieldErrors.preco ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/30' : 'border-gray-300 dark:border-gray-700 dark:bg-gray-900'
               }`}
             />
           </div>
           {fieldErrors.preco && (
-            <p className="text-red-500 text-xs mt-1">{fieldErrors.preco}</p>
+            <p className="text-red-500 text-xs mt-1 dark:text-red-400">{fieldErrors.preco}</p>
           )}
         </div>
 
         {/* Link de compra */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Link de Compra <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+            Link de Compra <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             type="url"
@@ -209,16 +209,16 @@ export default function ProductForm() {
             value={form.linkCompra}
             onChange={handleChange}
             placeholder="https://wa.me/5511999999999"
-            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm ${
+            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm dark:text-gray-100 ${
               fieldErrors.linkCompra
-                ? 'border-red-300 bg-red-50'
-                : 'border-gray-300'
+                ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/30'
+                : 'border-gray-300 dark:border-gray-700 dark:bg-gray-900'
             }`}
           />
           {fieldErrors.linkCompra && (
-            <p className="text-red-500 text-xs mt-1">{fieldErrors.linkCompra}</p>
+            <p className="text-red-500 text-xs mt-1 dark:text-red-400">{fieldErrors.linkCompra}</p>
           )}
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="text-gray-400 text-xs mt-1 dark:text-gray-500">
             Link para onde o cliente será redirecionado ao clicar em "Comprar"
             (WhatsApp, checkout, etc.)
           </p>
@@ -249,7 +249,7 @@ export default function ProductForm() {
           <button
             type="button"
             onClick={() => navigate('/admin')}
-            className="px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
           >
             Cancelar
           </button>

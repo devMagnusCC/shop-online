@@ -39,10 +39,10 @@ export default function Home() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Hero */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 dark:text-gray-100">
           Nossos Produtos
         </h1>
-        <p className="text-gray-500 max-w-lg mx-auto">
+        <p className="text-gray-500 max-w-lg mx-auto dark:text-gray-400">
           Confira nossa seleção de produtos. Clique para ver detalhes e comprar.
         </p>
       </div>
@@ -55,7 +55,7 @@ export default function Home() {
             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
               categoriaAtiva === ''
                 ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
             Todos
@@ -67,7 +67,7 @@ export default function Home() {
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                 categoriaAtiva === cat
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
               }`}
             >
               {cat}
@@ -83,7 +83,7 @@ export default function Home() {
       {!loading && error && (
         <div className="text-center py-16">
           <div className="text-red-400 text-5xl mb-4">⚠</div>
-          <p className="text-gray-700 mb-4">{error}</p>
+          <p className="text-gray-700 mb-4 dark:text-gray-300">{error}</p>
           <button
             onClick={fetchProdutos}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
@@ -96,8 +96,8 @@ export default function Home() {
       {/* Empty (sem produtos cadastrados) */}
       {!loading && !error && produtos.length === 0 && (
         <div className="text-center py-16">
-          <div className="text-gray-300 text-5xl mb-4">🛍️</div>
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">
+          <div className="text-gray-300 text-5xl mb-4 dark:text-gray-600">🛍️</div>
+          <h2 className="text-xl font-semibold text-gray-600 mb-2 dark:text-gray-300">
             Nenhum produto disponível
           </h2>
         </div>
@@ -106,13 +106,13 @@ export default function Home() {
       {/* Sem resultado na busca ou categoria */}
       {!loading && !error && produtos.length > 0 && filteredProdutos.length === 0 && (
         <div className="text-center py-16">
-          <div className="text-gray-300 text-5xl mb-4">🔍</div>
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">
+          <div className="text-gray-300 text-5xl mb-4 dark:text-gray-600">🔍</div>
+          <h2 className="text-xl font-semibold text-gray-600 mb-2 dark:text-gray-300">
             {search
               ? `Nenhum resultado para "${search}"`
               : 'Nenhum produto nesta categoria'}
           </h2>
-          <p className="text-gray-400">Tente outro termo de busca ou selecione outra categoria</p>
+          <p className="text-gray-400 dark:text-gray-500">Tente outro termo de busca ou selecione outra categoria</p>
         </div>
       )}
 

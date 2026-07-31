@@ -42,7 +42,7 @@ export default function ImageUpload({ midias = [], onChange }) {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
         Mídias do Produto (imagens e/ou vídeos)
       </label>
 
@@ -52,7 +52,7 @@ export default function ImageUpload({ midias = [], onChange }) {
           {midias.map((media, idx) => {
             const vid = isVideo(media);
             return (
-              <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100 border">
+              <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100 border dark:bg-gray-800 dark:border-gray-700">
                 {vid ? (
                   <div className="w-full h-full relative">
                     <video src={media} className="w-full h-full object-cover" muted playsInline />
@@ -89,7 +89,7 @@ export default function ImageUpload({ midias = [], onChange }) {
               }
             }}
             disabled={uploading}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200"
           >
             Adicionar imagens
           </button>
@@ -102,7 +102,7 @@ export default function ImageUpload({ midias = [], onChange }) {
               }
             }}
             disabled={uploading}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200"
           >
             Adicionar vídeo
           </button>
@@ -112,8 +112,8 @@ export default function ImageUpload({ midias = [], onChange }) {
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-      <p className="text-gray-400 text-xs mt-1">
+      {error && <p className="text-red-500 text-sm mt-1 dark:text-red-400">{error}</p>}
+      <p className="text-gray-400 text-xs mt-1 dark:text-gray-500">
         Imagens: JPG, PNG, GIF, WebP, SVG (máx. 5MB) | Vídeos: MP4, WebM, MOV (máx. 50MB)
       </p>
 
