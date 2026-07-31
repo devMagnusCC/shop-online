@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: achadinhos-loja
+    runtime: node
+    plan: free
+    buildCommand: "npm run build && cp -r dist server/public"
+    startCommand: "NODE_ENV=production node server/index.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
