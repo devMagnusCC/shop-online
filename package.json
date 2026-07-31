@@ -8,14 +8,14 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "start": "node server/index.js",
+    "start": "node server/entry.js",
     "server": "node --env-file=server/.env server/index.js",
     "dev:server": "nodemon --env-file=server/.env server/index.js",
     "dev:full": "concurrently \"npm run dev:server\" \"npm run dev\"",
     "dev:full:nodev": "concurrently \"npm run dev:server\"",
     "build:full": "npm run build && cp -r dist server/public",
     "prod": "NODE_ENV=production node --env-file=server/.env server/index.js",
-    "start:prod": "NODE_ENV=production node server/index.js"
+    "start:prod": "NODE_ENV=production node server/entry.js"
   },
   "dependencies": {
     "axios": "^1.18.1",

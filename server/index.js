@@ -59,19 +59,17 @@ const loginLimiter = rateLimit({
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Em produção, servir o build do frontend
-if (IS_PRODUCTION) {
-  const publicDir = path.join(__dirname, 'public');
-  if (fs.existsSync(publicDir)) {
-    app.use(express.static(publicDir));
-    // SPA fallback: qualquer rota não reconhecida serve o index.html
-    // Express 5: usar express.static + wildcard via middleware (sem '*')
-    app.use((req, res, next) => {
-      if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-        return res.sendFile(path.join(publicDir, 'index.html'));
-      }
-      next();
-    });
-  }
+// Serve sempre que o build existir (funciona em Railway, Render, PM2, local)
+const publicDir = path.join(__dirname, 'public');
+if (fs.existsSync(publicDir) && fs.existsSync(path.join(publicDir, 'index.html'))) {
+  app.use(express.static(publicDir));
+  // SPA fallback: qualquer rota não reconhecida serve o index.html
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+      return res.sendFile(path.join(publicDir, 'index.html'));
+    }
+    next();
+  });
 }
 
 // --- DB helpers ---
