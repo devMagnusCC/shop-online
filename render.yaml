@@ -3,7 +3,7 @@ services:
     name: achadinhos-loja
     runtime: node
     plan: free
-    buildCommand: "npm run build && cp -r dist server/public"
+    buildCommand: "./build.sh"
     startCommand: "node server/entry.js"
     envVars:
       - key: NODE_ENV
