@@ -64,8 +64,12 @@ if (IS_PRODUCTION) {
   if (fs.existsSync(publicDir)) {
     app.use(express.static(publicDir));
     // SPA fallback: qualquer rota não reconhecida serve o index.html
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(publicDir, 'index.html'));
+    // Express 5: usar express.static + wildcard via middleware (sem '*')
+    app.use((req, res, next) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+        return res.sendFile(path.join(publicDir, 'index.html'));
+      }
+      next();
     });
   }
 }
