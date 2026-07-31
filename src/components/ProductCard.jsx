@@ -83,7 +83,7 @@ export default function ProductCard({ produto }) {
             {produto.descricao}
           </p>
         )}
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-lg font-bold text-indigo-600">
             {formatPreco(produto.preco)}
           </span>
