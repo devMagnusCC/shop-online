@@ -115,7 +115,17 @@ export default function Dashboard() {
         } else {
           console.warn('[DEBUG] reqUrl ou parseFn não definidos');
         }
+      } catch (err) {
+        console.error('[DEBUG] Erro no bloco de verificação de preço:', err);
       }
+
+      setPrecoModal(modalData);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Erro ao verificar preço');
+    } finally {
+      setVerificandoPreco(null);
+    }
+  };
 
       setPrecoModal(modalData);
     } catch (err) {
