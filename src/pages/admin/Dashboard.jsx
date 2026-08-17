@@ -82,24 +82,29 @@ export default function Dashboard() {
         }
 
         if (reqUrl && parseFn) {
-          console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
-          const proxyRes = await fetch(reqUrl, {
-            headers: { Accept: 'application/json' },
-          });
-          console.log('[DEBUG] Proxy response status:', proxyRes.status);
-          if (proxyRes.ok) {
-            const data = await proxyRes.json();
-            const parsed = parseFn(data);
-            if (parsed) {
-              modalData.precoSugerido = parsed.preco;
-              modalData.moeda = parsed.moeda;
-              modalData.mensagem = null;
+          try {
+            console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
+            const proxyRes = await fetch(reqUrl, {
+              headers: { Accept: 'application/json' },
+            });
+            console.log('[DEBUG] Proxy response status:', proxyRes.status);
+            if (proxyRes.ok) {
+              const data = await proxyRes.json();
+              const parsed = parseFn(data);
+              if (parsed) {
+                modalData.precoSugerido = parsed.preco;
+                modalData.moeda = parsed.moeda;
+                modalData.mensagem = null;
+              } else {
+                console.warn('[DEBUG] ParseFn retornou null');
+              }
             } else {
-              console.warn('[DEBUG] ParseFn retornou null');
+              const errText = await proxyRes.text().catch(() => '');
+              console.warn('[DEBUG] Proxy falhou:', proxyRes.status, errText.slice(0, 200));
             }
+          } catch (err) {
+            console.error('[DEBUG] Erro no fetch do proxy:', err);
           }
-        } catch (err) {
-          console.error('[DEBUG] Erro no fetch do proxy:', err);
         }
       }
 
