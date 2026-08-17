@@ -88,6 +88,13 @@ export default function Dashboard() {
               headers: { Accept: 'application/json' },
             });
             console.log('[DEBUG] Proxy response status:', proxyRes.status);
+            if (reqUrl && parseFn) {
+          try {
+            console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
+            const proxyRes = await fetch(reqUrl, {
+              headers: { Accept: 'application/json' },
+            });
+            console.log('[DEBUG] Proxy response status:', proxyRes.status);
             if (proxyRes.ok) {
               const data = await proxyRes.json();
               const parsed = parseFn(data);
@@ -105,6 +112,8 @@ export default function Dashboard() {
           } catch (err) {
             console.error('[DEBUG] Erro no fetch do proxy:', err);
           }
+        } else {
+          console.warn('[DEBUG] reqUrl ou parseFn não definidos');
         }
       }
 
