@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProdutos, deleteProduto, updateProduto, verificarPreco, importarPrecos } from '../../api';
+import { getProdutos, deleteProduto, updateProduto, verificarPreco } from '../../api';
 import Loading from '../../components/Loading';
 
 function formatPreco(value) {
@@ -20,9 +20,6 @@ export default function Dashboard() {
   const [successMsg, setSuccessMsg] = useState('');
   const [verificandoPreco, setVerificandoPreco] = useState(null);
   const [precoModal, setPrecoModal] = useState(null);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importando, setImportando] = useState(false);
-  const [importResult, setImportResult] = useState(null);
 
   const fetchProdutos = async () => {
     setLoading(true);
@@ -181,12 +178,6 @@ export default function Dashboard() {
           >
             + Novo Produto
           </Link>
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium text-center"
-          >
-            Importar Preços (CSV)
-          </button>
         </div>
 
       {/* Search */}
