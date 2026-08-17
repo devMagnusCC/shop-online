@@ -60,44 +60,47 @@ export default function Dashboard() {
       const result = await verificarPreco(id);
       const modalData = { ...result.data, produtoId: id };
 
-      // Se o backend não conseguiu, tenta consultar direto do navegador
+      // Se o backend não conseguiu, tenta consultar via proxy do backend (contorna CORS)
       if (result.data.suportada && result.data.precoSugerido == null && result.data.lojaId) {
         try {
           const loja = result.data.loja;
-          let reqUrl = '';
+          let proxyUrl = '';
           let parseFn = null;
 
           if (loja === 'mercadolivre') {
-            reqUrl = `https://api.mercadolibre.com/items/${result.data.lojaId}`;
-            parseFn = (d) => d.price != null ? { preco: d.price, moeda: d.currency_id || 'BRL' } : null;
-          } else if (loja === 'amazon') {
-            // Amazon não tem API pública — tentar via scraping reverso é arriscado
-            // Deixa o link manual
+            reqUrl = `/api/preco/mercadolivre/${result.data.lojaId}`;
+            parseFn = (d) => d.preco != null ? { preco: d.preco, moeda: d.moeda } : null;
           } else if (loja === 'shopee') {
-            // Shopee API pública de busca de preço
             const [shopId, itemId] = result.data.lojaId.split('_');
             if (shopId && itemId) {
-              reqUrl = `https://shopee.com.br/api/v4/item/get?item_id=${itemId}&shop_id=${shopId}`;
-              parseFn = (d) => d?.data?.price_min ? { preco: d.data.price_min / 100000, moeda: 'BRL' } : null;
+              reqUrl = `/api/preco/shopee?shop_id=${shopId}&item_id=${itemId}`;
+              parseFn = (d) => d?.preco != null ? { preco: d.preco, moeda: d.moeda } : null;
             }
           }
 
           if (reqUrl && parseFn) {
-            const mlRes = await fetch(reqUrl, {
-              headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0' },
+            console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
+            const proxyRes = await fetch(reqUrl, {
+              headers: { Accept: 'application/json' },
             });
-            if (mlRes.ok) {
-              const data = await mlRes.json();
+            console.log('[DEBUG] Proxy response status:', proxyRes.status);
+            if (proxyRes.ok) {
+              const data = await proxyRes.json();
               const parsed = parseFn(data);
               if (parsed) {
                 modalData.precoSugerido = parsed.preco;
                 modalData.moeda = parsed.moeda;
                 modalData.mensagem = null;
+              } else {
+                console.warn('[DEBUG] ParseFn retornou null');
               }
+            } else {
+              const errText = await proxyRes.text().catch(() => '');
+              console.warn('[DEBUG] Proxy falhou:', proxyRes.status, errText.slice(0, 200));
             }
           }
-        } catch {
-          // Falhou no frontend também — mantém o resultado original
+        } catch (err) {
+          console.error('[DEBUG] Erro no fetch do proxy:', err);
         }
       }
 
