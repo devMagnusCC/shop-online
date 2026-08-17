@@ -132,6 +132,20 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB para vídeos
 });
 
+// Upload para CSV (importação de preços)
+const csvStorage = multer.memoryStorage();
+const csvUpload = multer({
+  storage: csvStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos CSV são permitidos'), false);
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB para CSV
+});
+
 // --- Helpers ---
 function sanitizeHtml(str) {
   return str
@@ -257,6 +271,78 @@ app.get('/api/preco/shopee', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Erro proxy Shopee:', err.message);
     res.status(500).json({ success: false, message: 'Erro ao consultar Shopee' });
+  }
+});
+
+// Importar preços via CSV
+app.post('/api/produtos/importar-precos', authMiddleware, csvUpload.single('arquivo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Arquivo CSV é obrigatório' });
+    }
+
+    const csvContent = req.file.buffer.toString('utf-8');
+    const linhas = csvContent.trim().split('\n');
+
+    if (linhas.length < 2) {
+      return res.status(400).json({ success: false, message: 'CSV deve ter cabeçalho e pelo menos uma linha de dados' });
+    }
+
+    // Parse do CSV (formato esperado: id,preco OU linkCompra,preco)
+    const cabecalho = linhas[0].toLowerCase().split(',').map(c => c.trim().replace(/"/g, ''));
+    const idxId = cabecalho.indexOf('id');
+    const idxLink = cabecalho.indexOf('linkcompra');
+    const idxPreco = cabecalho.indexOf('preco');
+
+    if (idxPreco === -1) {
+      return res.status(400).json({ success: false, message: 'Coluna "preco" é obrigatória' });
+    }
+    if (idxId === -1 && idxLink === -1) {
+      return res.status(400).json({ success: false, message: 'Coluna "id" ou "linkCompra" é obrigatória para identificar o produto' });
+    }
+
+    const db = readDB();
+    let atualizados = 0;
+    let erros = [];
+
+    for (let i = 1; i < linhas.length; i++) {
+      const valores = linhas[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      if (valores.length <= Math.max(idxId, idxLink, idxPreco)) continue;
+
+      const preco = parseFloat(valores[idxPreco].replace(',', '.'));
+      if (isNaN(preco) || preco < 0) {
+        erros.push(`Linha ${i + 1}: preço inválido "${valores[idxPreco]}"`);
+        continue;
+      }
+
+      let produto = null;
+      if (idxId !== -1 && valores[idxId]) {
+        produto = db.produtos.find(p => p.id === valores[idxId]);
+      } else if (idxLink !== -1 && valores[idxLink]) {
+        produto = db.produtos.find(p => p.linkCompra === valores[idxLink]);
+      }
+
+      if (!produto) {
+        erros.push(`Linha ${i + 1}: produto não encontrado (id: ${valores[idxId] || 'N/A'}, link: ${valores[idxLink] || 'N/A'})`);
+        continue;
+      }
+
+      produto.preco = preco;
+      produto.updatedAt = new Date().toISOString();
+      atualizados++;
+    }
+
+    writeDB(db);
+
+    res.json({
+      success: true,
+      message: `${atualizados} produto(s) atualizado(s)`,
+      atualizados,
+      erros: erros.length > 0 ? erros : undefined
+    });
+  } catch (err) {
+    console.error('Erro ao importar preços:', err);
+    res.status(500).json({ success: false, message: 'Erro ao processar CSV' });
   }
 });
 
