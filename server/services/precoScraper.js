@@ -240,7 +240,11 @@ export async function verificarPreco(linkCompra) {
     let resultado = await buscarPrecoMLAPI(mlbId);
     if (!resultado) resultado = await buscarPrecoScrapingGenerico(`https://www.mercadolivre.com.br/p/${mlbId}`);
 
-    if (!resultado) return { suportada: true, loja, lojaId: mlbId, precoSugerido: null, moeda: null, mensagem: null };
+    // SEMPRE retorna suportada: true para ML, mesmo sem conseguir buscar o preço
+    // O frontend fará a tentativa direta do navegador (IP residencial)
+    if (!resultado) {
+      return { suportada: true, loja, lojaId: mlbId, precoSugerido: null, moeda: null, mensagem: 'Não foi possível consultar o preço automaticamente. Tentando direto do seu navegador...' };
+    }
 
     return { suportada: true, loja, lojaId: mlbId, precoSugerido: resultado.preco, moeda: resultado.moeda, mensagem: null };
   }
@@ -259,7 +263,10 @@ export async function verificarPreco(linkCompra) {
       if (baseUrl) resultado = await buscarPrecoScrapingGenerico(baseUrl[0]);
     }
 
-    if (!resultado) return { suportada: true, loja, lojaId: asin, precoSugerido: null, moeda: null, mensagem: null };
+    // Amazon não tem API pública — retornar suportada para frontend tentar
+    if (!resultado) {
+      return { suportada: true, loja, lojaId: asin, precoSugerido: null, moeda: null, mensagem: 'Amazon não tem API pública. Tentando direto do seu navegador...' };
+    }
 
     return { suportada: true, loja, lojaId: asin, precoSugerido: resultado.preco, moeda: resultado.moeda, mensagem: null };
   }
@@ -272,7 +279,7 @@ export async function verificarPreco(linkCompra) {
     }
 
     // Shopee renderiza quase tudo via JS — scraping server-side raramente funciona
-    // Tenta mesmo assim, mas já avisa que pode falhar
+    // Retornar suportada=true para o frontend tentar
     const resultado = await buscarPrecoScrapingGenerico(linkCompra);
 
     if (!resultado) {
@@ -282,7 +289,7 @@ export async function verificarPreco(linkCompra) {
         lojaId: `${ids.shopId}_${ids.itemId}`,
         precoSugerido: null,
         moeda: null,
-        mensagem: 'Shopee requer JavaScript para exibir preços. Abra o link para verificar manualmente.',
+        mensagem: 'Shopee requer JavaScript para exibir preços. Tentando direto do seu navegador...',
       };
     }
 
