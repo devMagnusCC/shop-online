@@ -5,13 +5,6 @@ import ImageGallery from '../../components/ImageGallery';
 import Loading from '../../components/Loading';
 import { useFavoritos } from '../../context/FavoritosContext';
 
-function formatPreco(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
-
 export default function ProductDetail() {
   const { id } = useParams();
   const [produto, setProduto] = useState(null);
@@ -104,10 +97,6 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          <div className="text-3xl font-bold text-indigo-600 mb-6 dark:text-indigo-400">
-            {formatPreco(produto.preco)}
-          </div>
-
           {produto.descricao && (
             <div className="mb-8">
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 dark:text-gray-400">
@@ -126,7 +115,7 @@ export default function ProductDetail() {
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center px-8 py-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none"
             >
-              Comprar agora
+              Ver oferta
               <svg
                 className="ml-2 w-5 h-5"
                 fill="none"
@@ -142,7 +131,7 @@ export default function ProductDetail() {
               </svg>
             </a>
             <p className="text-xs text-gray-400 text-center mt-2 dark:text-gray-500">
-              Você será redirecionado para finalizar a compra
+              Você será redirecionado para ver o preço e finalizar a compra
             </p>
           </div>
         </div>

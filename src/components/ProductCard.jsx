@@ -3,13 +3,6 @@ import { useFavoritos } from '../context/FavoritosContext';
 
 const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23e5e7eb'/%3E%3Ctext x='200' y='150' text-anchor='middle' fill='%239ca3af' font-family='sans-serif' font-size='16'%3ESem imagem%3C/text%3E%3C/svg%3E`;
 
-function formatPreco(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
-
 function isVideo(url) {
   return /\.(mp4|webm|mov)$/i.test(url);
 }
@@ -83,12 +76,9 @@ export default function ProductCard({ produto }) {
             {produto.descricao}
           </p>
         )}
-        <div className="mt-3 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-            {formatPreco(produto.preco)}
-          </span>
-          <span className="text-xs text-indigo-600 font-medium group-hover:underline dark:text-indigo-400">
-            Ver mais →
+        <div className="mt-3">
+          <span className="inline-block text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors group-hover:bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-950/50 dark:group-hover:bg-indigo-900/60">
+            Ver oferta →
           </span>
         </div>
       </div>

@@ -39,8 +39,4 @@ export const deleteImagem = (filename) =>
 export const login = (username, password) =>
   api.post('/login', { username, password }).then((r) => r.data);
 
-// Preço
-export const verificarPreco = (id) =>
-  api.get(`/produtos/${id}/preco`).then((r) => r.data);
-
 export default api;

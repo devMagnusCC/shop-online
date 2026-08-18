@@ -120,15 +120,16 @@ export default function Ajuda() {
           <hr className="border-gray-100 dark:border-gray-800" />
           <details className="group">
             <summary className="flex items-center justify-between gap-2 cursor-pointer text-sm font-medium text-gray-900 py-2 list-none dark:text-gray-100">
-              Os preços são atualizados automaticamente?
+              Por que vocês não mostram o preço aqui no site?
               <svg className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
             </summary>
             <p className="text-sm text-gray-500 pb-3 dark:text-gray-400">
-              Sim! Sempre que possível, o sistema verifica o preço atual do produto no
-              link da loja parceira e sugere a atualização. Você pode clicar em
-              "Verificar Preço" no painel admin para conferir.
+              Os preços dos produtos mudam constantemente nas lojas parceiras. Para
+              garantir que você sempre veja o valor exato e atualizado, ao clicar em
+              "Ver oferta" você é direcionado para a página oficial do produto, onde
+              o preço é exibido em tempo real pela própria loja.
             </p>
           </details>
           <hr className="border-gray-100 dark:border-gray-800" />

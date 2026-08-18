@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProdutos, deleteProduto, updateProduto, verificarPreco } from '../../api';
+import { getProdutos, deleteProduto, updateProduto } from '../../api';
 import Loading from '../../components/Loading';
-
-function formatPreco(value) {
-  return Number(value).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
 
 export default function Dashboard() {
   const [produtos, setProdutos] = useState([]);
@@ -18,8 +11,6 @@ export default function Dashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [verificandoPreco, setVerificandoPreco] = useState(null);
-  const [precoModal, setPrecoModal] = useState(null);
 
   const fetchProdutos = async () => {
     setLoading(true);
@@ -50,87 +41,6 @@ export default function Dashboard() {
     } finally {
       setDeleting(false);
       setDeleteConfirm(null);
-    }
-  };
-
-  const handleVerificarPreco = async (id) => {
-    setVerificandoPreco(id);
-    setError(null);
-    try {
-      const result = await verificarPreco(id);
-      const modalData = { ...result.data, produtoId: id };
-
-      // Se o backend não conseguiu, tenta consultar via proxy do backend (contorna CORS)
-      if (result.data.suportada && result.data.precoSugerido == null && result.data.lojaId) {
-        let reqUrl = '';
-        let parseFn = null;
-
-        const loja = result.data.loja;
-
-        if (loja === 'mercadolivre') {
-          reqUrl = `/api/preco/mercadolivre/${result.data.lojaId}`;
-          parseFn = (d) => d.preco != null ? { preco: d.preco, moeda: d.moeda } : null;
-        } else if (loja === 'shopee') {
-          const [shopId, itemId] = result.data.lojaId.split('_');
-          if (shopId && itemId) {
-            reqUrl = `/api/preco/shopee?shop_id=${shopId}&item_id=${itemId}`;
-            parseFn = (d) => d?.preco != null ? { preco: d.preco, moeda: d.moeda } : null;
-          }
-        }
-
-        if (reqUrl && parseFn) {
-          try {
-            const proxyRes = await fetch(reqUrl, {
-              headers: { Accept: 'application/json' },
-            });
-            if (proxyRes.ok) {
-              const data = await proxyRes.json();
-              const parsed = parseFn(data);
-              if (parsed) {
-                modalData.precoSugerido = parsed.preco;
-                modalData.moeda = parsed.moeda;
-                modalData.mensagem = null;
-              } else {
-                console.warn('[DEBUG] ParseFn retornou null');
-              }
-            } else {
-              const errText = await proxyRes.text().catch(() => '');
-              console.warn('[DEBUG] Proxy falhou:', proxyRes.status, errText.slice(0, 200));
-            }
-          } catch (err) {
-            console.error('[DEBUG] Erro no fetch do proxy:', err);
-          }
-        }
-      }
-
-      setPrecoModal(modalData);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao verificar preço');
-    } finally {
-      setVerificandoPreco(null);
-    }
-  };
-
-  const handleAtualizarPreco = async (id, novoPreco) => {
-    try {
-      const produto = produtos.find((p) => p.id === id);
-      if (!produto) return;
-      await updateProduto(id, {
-        nome: produto.nome,
-        descricao: produto.descricao || '',
-        preco: novoPreco,
-        midias: produto.midias || [],
-        categoria: produto.categoria || '',
-        linkCompra: produto.linkCompra,
-      });
-      setProdutos((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, preco: novoPreco } : p))
-      );
-      setPrecoModal(null);
-      setSuccessMsg('Preço atualizado com sucesso!');
-      setTimeout(() => setSuccessMsg(''), 3000);
-    } catch (err) {
-      setError('Erro ao atualizar preço');
     }
   };
 
@@ -232,9 +142,6 @@ export default function Dashboard() {
                     <th className="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
                       Produto
                     </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-500 hidden sm:table-cell dark:text-gray-400">
-                      Preço
-                    </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-500 hidden md:table-cell dark:text-gray-400">
                       Categoria
                     </th>
@@ -263,9 +170,6 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-gray-700 hidden sm:table-cell dark:text-gray-300">
-                        {formatPreco(produto.preco)}
-                      </td>
                       <td className="py-3 px-4 text-gray-500 hidden md:table-cell dark:text-gray-400">
                         {produto.categoria || <span className="text-gray-300 dark:text-gray-600">&mdash;</span>}
                       </td>
@@ -274,13 +178,6 @@ export default function Dashboard() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleVerificarPreco(produto.id)}
-                            disabled={verificandoPreco === produto.id}
-                            className="px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors text-xs font-medium disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
-                          >
-                            {verificandoPreco === produto.id ? 'Verificando...' : 'Verificar Preço'}
-                          </button>
                           <Link
                             to={`/admin/editar/${produto.id}`}
                             className="px-3 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors text-xs font-medium dark:text-indigo-400 dark:hover:bg-indigo-950/50"
@@ -301,106 +198,6 @@ export default function Dashboard() {
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Preço verification modal */}
-      {precoModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full dark:bg-gray-900">
-            {precoModal.suportada ? (
-              <>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">
-                  Comparação de Preço
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-500 dark:text-gray-400">Preço atual (cadastrado):</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">{formatPreco(precoModal.precoAtual)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-t border-gray-100 dark:border-gray-800">
-                    <span className="text-gray-500 dark:text-gray-400">Preço no link:</span>
-                    <span className={`font-semibold ${precoModal.precoSugerido != null ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {precoModal.precoSugerido != null ? formatPreco(precoModal.precoSugerido) : '—'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-t border-gray-100 dark:border-gray-800">
-                    <span className="text-gray-500 dark:text-gray-400">Loja:</span>
-                    <span className="font-medium capitalize text-gray-700 dark:text-gray-300">
-                      {precoModal.loja === 'mercadolivre' ? 'Mercado Livre' : precoModal.loja === 'amazon' ? 'Amazon' : precoModal.loja === 'shopee' ? 'Shopee' : precoModal.loja || '—'}
-                    </span>
-                  </div>
-                </div>
-
-                {precoModal.precoSugerido == null && precoModal.linkCompra ? (
-                  <p className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg dark:text-amber-300 dark:bg-amber-950/50">
-                    Não foi possível buscar o preço automaticamente.{' '}
-                    <a
-                      href={precoModal.linkCompra}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium underline hover:text-amber-800 dark:hover:text-amber-300"
-                    >
-                      Ver preço no site
-                    </a>
-                  </p>
-                ) : precoModal.mensagem ? (
-                  <p className="mt-3 text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                    {precoModal.mensagem}
-                  </p>
-                ) : null}
-
-                {precoModal.precoSugerido != null && precoModal.precoAtual !== precoModal.precoSugerido && (
-                  <p className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg dark:text-amber-300 dark:bg-amber-950/50">
-                    O preço do produto difere do valor encontrado no link.
-                  </p>
-                )}
-
-                {precoModal.precoSugerido != null && precoModal.precoAtual === precoModal.precoSugerido && (
-                  <p className="mt-3 text-sm text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg dark:text-emerald-300 dark:bg-emerald-950/50">
-                    O preço já está atualizado!
-                  </p>
-                )}
-
-                <div className="flex justify-end gap-3 mt-6">
-                  <button
-                    onClick={() => setPrecoModal(null)}
-                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Fechar
-                  </button>
-                  {precoModal.precoSugerido != null && precoModal.precoAtual !== precoModal.precoSugerido && (
-                    <button
-                      onClick={() => handleAtualizarPreco(precoModal.produtoId, precoModal.precoSugerido)}
-                      className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                    >
-                      Atualizar Preço
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 dark:text-gray-100">
-                  Loja não suportada
-                </h3>
-                <p className="text-sm text-gray-500 mb-6 dark:text-gray-400">
-                  {precoModal.mensagem || 'Não foi possível verificar o preço para esta loja.'}
-                </p>
-                <p className="text-xs text-gray-400 mb-6 dark:text-gray-500">
-                  Atualmente suportamos Mercado Livre, Amazon e Shopee.
-                </p>
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => setPrecoModal(null)}
-                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       )}
 

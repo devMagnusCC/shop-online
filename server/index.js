@@ -12,8 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import { loginHandler, authMiddleware } from './middleware/auth.js';
-import { verificarPreco } from './services/precoScraper.js';
-import axios from 'axios';
 
 // Mantenha sincronizado com src/constants/categorias.js
 const CATEGORIAS = [
@@ -195,93 +193,6 @@ app.get('/api/produtos', (req, res) => {
   } catch (err) {
     console.error('Erro ao listar produtos:', err);
     res.status(500).json({ error: 'Erro ao carregar produtos' });
-  }
-});
-
-// --- Price check route (must come BEFORE /api/produtos/:id) ---
-app.get('/api/produtos/:id/preco', authMiddleware, async (req, res) => {
-  try {
-    const db = readDB();
-    const produto = db.produtos.find((p) => p.id === req.params.id);
-    if (!produto) {
-      return res.status(404).json({ error: 'Produto não encontrado' });
-    }
-    if (!produto.linkCompra) {
-      return res.status(400).json({ error: 'Produto não possui link de compra' });
-    }
-
-    const resultado = await verificarPreco(produto.linkCompra);
-
-    if (!resultado.suportada) {
-      return res.json({
-        success: true,
-        data: {
-          precoAtual: produto.preco,
-          linkCompra: produto.linkCompra,
-          suportada: false,
-          loja: resultado.loja || null,
-          mensagem: resultado.mensagem || 'Não foi possível verificar preço para esta loja.',
-        },
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: {
-        precoAtual: produto.preco,
-        linkCompra: produto.linkCompra,
-        suportada: true,
-        loja: resultado.loja,
-        lojaId: resultado.lojaId,
-        precoSugerido: resultado.precoSugerido,
-        moeda: resultado.moeda,
-        mensagem: resultado.mensagem,
-      },
-    });
-  } catch (err) {
-    console.error('Erro ao verificar preço:', err);
-    res.status(500).json({ error: 'Erro ao verificar preço' });
-  }
-});
-
-// Proxy para buscar preços externos (contorna CORS)
-app.get('/api/preco/mercadolivre/:mlbId', authMiddleware, async (req, res) => {
-  try {
-    const { mlbId } = req.params;
-    const response = await axios.get(`https://api.mercadolibre.com/items/${mlbId}`, {
-      timeout: 8000,
-      headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' },
-    });
-    const { price, currency_id } = response.data;
-    if (price != null) {
-      return res.json({ success: true, preco: price, moeda: currency_id || 'BRL' });
-    }
-    res.json({ success: false, message: 'Preço não encontrado' });
-  } catch (err) {
-    console.error('Erro proxy ML:', err.message);
-    res.status(500).json({ success: false, message: 'Erro ao consultar Mercado Livre' });
-  }
-});
-
-app.get('/api/preco/shopee', authMiddleware, async (req, res) => {
-  try {
-    const { shop_id, item_id } = req.query;
-    if (!shop_id || !item_id) {
-      return res.status(400).json({ success: false, message: 'shop_id e item_id obrigatórios' });
-    }
-    const response = await axios.get('https://shopee.com.br/api/v4/item/get', {
-      params: { item_id: item_id, shop_id: shop_id },
-      timeout: 8000,
-      headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' },
-    });
-    const priceMin = response.data?.data?.price_min;
-    if (priceMin != null) {
-      return res.json({ success: true, preco: priceMin / 100000, moeda: 'BRL' });
-    }
-    res.json({ success: false, message: 'Preço não encontrado' });
-  } catch (err) {
-    console.error('Erro proxy Shopee:', err.message);
-    res.status(500).json({ success: false, message: 'Erro ao consultar Shopee' });
   }
 });
 
