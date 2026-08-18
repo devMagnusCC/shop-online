@@ -13,7 +13,6 @@ export default function ProductForm() {
   const [form, setForm] = useState({
     nome: '',
     descricao: '',
-    preco: '',
     midias: [],
     categoria: '',
     linkCompra: '',
@@ -33,7 +32,6 @@ export default function ProductForm() {
         setForm({
           nome: p.nome || '',
           descricao: p.descricao || '',
-          preco: String(p.preco || ''),
           midias: p.midias || p.imagens || [],
           categoria: p.categoria || '',
           linkCompra: p.linkCompra || '',
@@ -49,9 +47,6 @@ export default function ProductForm() {
   const validate = () => {
     const errors = {};
     if (!form.nome.trim()) errors.nome = 'Nome é obrigatório';
-    if (!form.preco || isNaN(parseFloat(form.preco)) || parseFloat(form.preco) <= 0) {
-      errors.preco = 'Preço deve ser um número maior que zero';
-    }
     if (!form.linkCompra.trim()) errors.linkCompra = 'Link de compra é obrigatório';
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -73,10 +68,7 @@ export default function ProductForm() {
     setError(null);
 
     try {
-      const payload = {
-        ...form,
-        preco: parseFloat(form.preco),
-      };
+      const payload = { ...form };
 
       if (isEditing) {
         await updateProduto(id, payload);
@@ -169,33 +161,6 @@ export default function ProductForm() {
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-        </div>
-
-        {/* Preço */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-            Preço <span className="text-red-500 dark:text-red-400">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm dark:text-gray-500">
-              R$
-            </span>
-            <input
-              type="number"
-              name="preco"
-              value={form.preco}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              placeholder="99,90"
-              className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow text-sm dark:text-gray-100 ${
-                fieldErrors.preco ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/30' : 'border-gray-300 dark:border-gray-700 dark:bg-gray-900'
-              }`}
-            />
-          </div>
-          {fieldErrors.preco && (
-            <p className="text-red-500 text-xs mt-1 dark:text-red-400">{fieldErrors.preco}</p>
-          )}
         </div>
 
         {/* Link de compra */}

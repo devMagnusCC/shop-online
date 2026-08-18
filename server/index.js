@@ -219,10 +219,6 @@ app.post('/api/produtos', authMiddleware, (req, res) => {
       return res.status(400).json({ error: 'Nome é obrigatório' });
     }
 
-    if (preco === undefined || preco === null || isNaN(Number(preco)) || Number(preco) < 0) {
-      return res.status(400).json({ error: 'Preço inválido' });
-    }
-
     if (!linkCompra || !isValidUrl(linkCompra)) {
       return res.status(400).json({ error: 'Link de compra inválido. Deve começar com http:// ou https://' });
     }
@@ -236,7 +232,8 @@ app.post('/api/produtos', authMiddleware, (req, res) => {
       id: uuidv4(),
       nome: sanitizeHtml(nome.trim()),
       descricao: descricao ? sanitizeHtml(descricao.trim()) : '',
-      preco: parseFloat(preco),
+      // Preço é informativo/manual e não é mais obrigatório ao cadastrar
+      preco: preco !== undefined && preco !== null && !isNaN(Number(preco)) ? parseFloat(preco) : null,
       midias: Array.isArray(midias) ? midias : [],
       categoria: categoria || '',
       linkCompra: linkCompra.trim(),
@@ -268,10 +265,6 @@ app.put('/api/produtos/:id', authMiddleware, (req, res) => {
       return res.status(400).json({ error: 'Nome é obrigatório' });
     }
 
-    if (preco === undefined || preco === null || isNaN(Number(preco)) || Number(preco) < 0) {
-      return res.status(400).json({ error: 'Preço inválido' });
-    }
-
     if (!linkCompra || !isValidUrl(linkCompra)) {
       return res.status(400).json({ error: 'Link de compra inválido. Deve começar com http:// ou https://' });
     }
@@ -284,7 +277,8 @@ app.put('/api/produtos/:id', authMiddleware, (req, res) => {
       ...db.produtos[index],
       nome: sanitizeHtml(nome.trim()),
       descricao: descricao ? sanitizeHtml(descricao.trim()) : '',
-      preco: parseFloat(preco),
+      // Preço opcional ao editar: preserva o valor atual quando não informado
+      preco: preco !== undefined && preco !== null && !isNaN(Number(preco)) ? parseFloat(preco) : db.produtos[index].preco,
       midias: Array.isArray(midias) ? midias : [],
       categoria: categoria || '',
       linkCompra: linkCompra.trim(),
