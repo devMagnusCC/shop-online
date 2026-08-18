@@ -12,14 +12,14 @@ export default function StoreLayout() {
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-gray-950">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 dark:bg-gray-900 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3">
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <img src="/logo.jpg" alt="Achadinhos Clubedodesconto" className="h-9 w-9 rounded-full object-cover" />
               <span className="text-lg sm:text-xl font-bold text-gray-900 hidden sm:inline dark:text-gray-100">Achadinhos clube do desconto</span>
             </Link>
 
-            {/* Search */}
-            <div className="flex-1 max-w-md">
+            {/* Search - no mobile ocupa linha própria (largura total); no desktop volta ao meio */}
+            <div className="order-last basis-full sm:order-none sm:basis-0 sm:flex-1 sm:max-w-md w-full">
               <div className="relative">
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
