@@ -80,18 +80,9 @@ export default function Dashboard() {
 
         if (reqUrl && parseFn) {
           try {
-            console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
             const proxyRes = await fetch(reqUrl, {
               headers: { Accept: 'application/json' },
             });
-            console.log('[DEBUG] Proxy response status:', proxyRes.status);
-            if (reqUrl && parseFn) {
-          try {
-            console.log('[DEBUG] Tentando proxy do backend:', reqUrl);
-            const proxyRes = await fetch(reqUrl, {
-              headers: { Accept: 'application/json' },
-            });
-            console.log('[DEBUG] Proxy response status:', proxyRes.status);
             if (proxyRes.ok) {
               const data = await proxyRes.json();
               const parsed = parseFn(data);
@@ -109,20 +100,8 @@ export default function Dashboard() {
           } catch (err) {
             console.error('[DEBUG] Erro no fetch do proxy:', err);
           }
-        } else {
-          console.warn('[DEBUG] reqUrl ou parseFn não definidos');
         }
-      } catch (err) {
-        console.error('[DEBUG] Erro no bloco de verificação de preço:', err);
       }
-
-      setPrecoModal(modalData);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao verificar preço');
-    } finally {
-      setVerificandoPreco(null);
-    }
-  };
 
       setPrecoModal(modalData);
     } catch (err) {
@@ -179,6 +158,7 @@ export default function Dashboard() {
             + Novo Produto
           </Link>
         </div>
+      </div>
 
       {/* Search */}
       <div className="mb-4">
@@ -458,68 +438,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full dark:bg-gray-900">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-gray-100">
-              Importar Preços via CSV
-            </h3>
-            <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">
-              Formato do CSV: <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs">id,preco</code> ou <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs">linkCompra,preco</code>
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Arquivo CSV
-                </label>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => setImportFile(e.target.files[0])}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                />
-              </div>
-              {importResult && (
-                <div className={`p-3 rounded-lg text-sm ${importResult.success ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-300' : 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300'}`}>
-                  <p className="font-medium">{importResult.message}</p>
-                  {importResult.atualizados !== undefined && (
-                    <p className="mt-1">Produtos atualizados: {importResult.atualizados}</p>
-                  )}
-                  {importResult.erros && importResult.erros.length > 0 && (
-                    <div className="mt-2 max-h-32 overflow-y-auto text-xs">
-                      <p className="font-medium mb-1">Erros:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        {importResult.erros.map((erro, i) => (
-                          <li key={i}>{erro}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                )}
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => { setShowImportModal(false); setImportResult(null); }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  Fechar
-                </button>
-                <button
-                  onClick={handleImportPrecos}
-                  disabled={importando || !importFile}
-                  className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-                >
-                  {importando && (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                  )}
-                  {importando ? 'Importando...' : 'Importar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
   );
 }

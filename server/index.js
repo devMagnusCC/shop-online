@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 
 import { loginHandler, authMiddleware } from './middleware/auth.js';
 import { verificarPreco } from './services/precoScraper.js';
+import axios from 'axios';
 
 // Mantenha sincronizado com src/constants/categorias.js
 const CATEGORIAS = [
@@ -30,7 +31,17 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN || 'http://localhost:5174,http://localhost:5173')
   .split(',')
-  .map((s) => s.trim());
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+// Em produção (Render), o frontend e a API vivem no mesmo domínio (same-origin):
+// o navegador não envia header Origin nas chamadas à mesma origem, então o CORS
+// não bloqueia. Também aceitamos o próprio host para chamadas cross-origin
+// (ex.: domínio definitivo acessado com/sem www).
+const PRODUCTION_HOST = IS_PRODUCTION ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME || 'achadinhos-loja.onrender.com'}` : null;
+if (PRODUCTION_HOST && !ALLOWED_ORIGINS.includes(PRODUCTION_HOST)) {
+  ALLOWED_ORIGINS.push(PRODUCTION_HOST);
+}
 
 app.use(cors({
   origin: (origin, cb) => {
