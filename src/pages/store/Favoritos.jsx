@@ -7,7 +7,7 @@ import { useFavoritos } from '../../context/FavoritosContext';
 
 export default function Favoritos() {
   const { search } = useOutletContext();
-  const { favoritos } = useFavoritos();
+  const { favoritos, syncFavoritos } = useFavoritos();
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +17,10 @@ export default function Favoritos() {
     setError(null);
     try {
       const data = await getProdutos();
-      setProdutos(data.data || []);
+      const lista = data.data || [];
+      setProdutos(lista);
+      // Remove favoritos de produtos que não existem mais no catalogo
+      syncFavoritos(lista);
     } catch (err) {
       setError('Erro ao carregar os produtos. Tente novamente.');
     } finally {

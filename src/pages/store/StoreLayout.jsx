@@ -1,12 +1,22 @@
 import { Link, Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFavoritos } from '../../context/FavoritosContext';
 import { useTheme } from '../../context/ThemeContext';
+import { getProdutos } from '../../api';
 
 export default function StoreLayout() {
   const [search, setSearch] = useState('');
-  const { favoritos } = useFavoritos();
+  const { favoritos, syncFavoritos } = useFavoritos();
   const { theme, toggleTheme } = useTheme();
+
+  // Busca produtos para validar o contador de favoritos no header.
+  // Produtos deletados deixam IDs "fantasma" no localStorage — este sync
+  // remove esses IDs, mantendo o contador consistente com o catalogo real.
+  useEffect(() => {
+    getProdutos()
+      .then((data) => syncFavoritos(data.data || []))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-gray-950">

@@ -38,8 +38,19 @@ export function FavoritosProvider({ children }) {
 
   const isFavorito = (id) => favoritos.includes(id);
 
+  // Recebe a lista de produtos existentes e remove do estado/localStorage
+// os IDs de favoritos que nao correspondem a nenhum produto atual.
+// Evita contadores "fantasma" quando um produto favoritado e excluido.
+const syncFavoritos = (produtos) => {
+    const idsValidos = new Set(produtos.map((p) => p.id));
+    setFavoritos((prev) => {
+      const filtrados = prev.filter((id) => idsValidos.has(id));
+      return filtrados.length === prev.length ? prev : filtrados;
+    });
+  };
+
   return (
-    <FavoritosContext.Provider value={{ favoritos, toggleFavorito, isFavorito }}>
+    <FavoritosContext.Provider value={{ favoritos, toggleFavorito, isFavorito, syncFavoritos }}>
       {children}
     </FavoritosContext.Provider>
   );
