@@ -12,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import { loginHandler, authMiddleware } from './middleware/auth.js';
+import pool, { initDB, rowToProduto } from './db.js';
 
 // Mantenha sincronizado com src/constants/categorias.js
 const CATEGORIAS = [
@@ -82,22 +83,6 @@ if (fs.existsSync(publicDir) && fs.existsSync(path.join(publicDir, 'index.html')
     }
     next();
   });
-}
-
-// --- DB helpers ---
-const DB_PATH = path.join(__dirname, 'db.json');
-
-function readDB() {
-  try {
-    const raw = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return { produtos: [] };
-  }
-}
-
-function writeDB(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 // --- Multer config ---
@@ -186,24 +171,23 @@ function isVideo(filename) {
 app.post('/api/login', loginLimiter, loginHandler);
 
 // --- Product routes (public) ---
-app.get('/api/produtos', (req, res) => {
+app.get('/api/produtos', async (req, res) => {
   try {
-    const db = readDB();
-    res.json({ success: true, data: db.produtos });
+    const { rows } = await pool.query('SELECT * FROM produtos ORDER BY created_at ASC');
+    res.json({ success: true, data: rows.map(rowToProduto) });
   } catch (err) {
     console.error('Erro ao listar produtos:', err);
     res.status(500).json({ error: 'Erro ao carregar produtos' });
   }
 });
 
-app.get('/api/produtos/:id', (req, res) => {
+app.get('/api/produtos/:id', async (req, res) => {
   try {
-    const db = readDB();
-    const produto = db.produtos.find((p) => p.id === req.params.id);
-    if (!produto) {
+    const { rows } = await pool.query('SELECT * FROM produtos WHERE id = $1', [req.params.id]);
+    if (rows.length === 0) {
       return res.status(404).json({ error: 'Produto não encontrado' });
     }
-    res.json({ success: true, data: produto });
+    res.json({ success: true, data: rowToProduto(rows[0]) });
   } catch (err) {
     console.error('Erro ao buscar produto:', err);
     res.status(500).json({ error: 'Erro ao buscar produto' });
@@ -211,7 +195,7 @@ app.get('/api/produtos/:id', (req, res) => {
 });
 
 // --- Product routes (admin, auth required) ---
-app.post('/api/produtos', authMiddleware, (req, res) => {
+app.post('/api/produtos', authMiddleware, async (req, res) => {
   try {
     const { nome, descricao, preco, midias, linkCompra, categoria } = req.body;
 
@@ -227,7 +211,7 @@ app.post('/api/produtos', authMiddleware, (req, res) => {
       return res.status(400).json({ error: `Categoria inválida. Categorias disponíveis: ${CATEGORIAS.join(', ')}` });
     }
 
-    const db = readDB();
+    const agora = new Date().toISOString();
     const novoProduto = {
       id: uuidv4(),
       nome: sanitizeHtml(nome.trim()),
@@ -237,27 +221,40 @@ app.post('/api/produtos', authMiddleware, (req, res) => {
       midias: Array.isArray(midias) ? midias : [],
       categoria: categoria || '',
       linkCompra: linkCompra.trim(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: agora,
+      updatedAt: agora,
     };
 
-    db.produtos.push(novoProduto);
-    writeDB(db);
+    const { rows } = await pool.query(
+      `INSERT INTO produtos (id, nome, descricao, preco, midias, categoria, link_compra, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        novoProduto.id,
+        novoProduto.nome,
+        novoProduto.descricao,
+        novoProduto.preco,
+        novoProduto.midias,
+        novoProduto.categoria,
+        novoProduto.linkCompra,
+        novoProduto.createdAt,
+        novoProduto.updatedAt,
+      ]
+    );
 
-    res.status(201).json({ success: true, data: novoProduto });
+    res.status(201).json({ success: true, data: rowToProduto(rows[0]) });
   } catch (err) {
     console.error('Erro ao criar produto:', err);
     res.status(500).json({ error: 'Erro ao criar produto' });
   }
 });
 
-app.put('/api/produtos/:id', authMiddleware, (req, res) => {
+app.put('/api/produtos/:id', authMiddleware, async (req, res) => {
   try {
     const { nome, descricao, preco, midias, linkCompra, categoria } = req.body;
-    const db = readDB();
-    const index = db.produtos.findIndex((p) => p.id === req.params.id);
 
-    if (index === -1) {
+    const { rows: existentes } = await pool.query('SELECT * FROM produtos WHERE id = $1', [req.params.id]);
+    if (existentes.length === 0) {
       return res.status(404).json({ error: 'Produto não encontrado' });
     }
 
@@ -273,36 +270,45 @@ app.put('/api/produtos/:id', authMiddleware, (req, res) => {
       return res.status(400).json({ error: `Categoria inválida. Categorias disponíveis: ${CATEGORIAS.join(', ')}` });
     }
 
-    db.produtos[index] = {
-      ...db.produtos[index],
-      nome: sanitizeHtml(nome.trim()),
-      descricao: descricao ? sanitizeHtml(descricao.trim()) : '',
-      // Preço opcional ao editar: preserva o valor atual quando não informado
-      preco: preco !== undefined && preco !== null && !isNaN(Number(preco)) ? parseFloat(preco) : db.produtos[index].preco,
-      midias: Array.isArray(midias) ? midias : [],
-      categoria: categoria || '',
-      linkCompra: linkCompra.trim(),
-      updatedAt: new Date().toISOString(),
-    };
+    // Preço opcional ao editar: preserva o valor atual quando não informado
+    const precoFinal =
+      preco !== undefined && preco !== null && !isNaN(Number(preco))
+        ? parseFloat(preco)
+        : existentes[0].preco;
 
-    writeDB(db);
-    res.json({ success: true, data: db.produtos[index] });
+    const { rows } = await pool.query(
+      `UPDATE produtos
+       SET nome = $1, descricao = $2, preco = $3, midias = $4, categoria = $5,
+           link_compra = $6, updated_at = $7
+       WHERE id = $8
+       RETURNING *`,
+      [
+        sanitizeHtml(nome.trim()),
+        descricao ? sanitizeHtml(descricao.trim()) : '',
+        precoFinal,
+        Array.isArray(midias) ? midias : [],
+        categoria || '',
+        linkCompra.trim(),
+        new Date().toISOString(),
+        req.params.id,
+      ]
+    );
+
+    res.json({ success: true, data: rowToProduto(rows[0]) });
   } catch (err) {
     console.error('Erro ao atualizar produto:', err);
     res.status(500).json({ error: 'Erro ao atualizar produto' });
   }
 });
 
-app.delete('/api/produtos/:id', authMiddleware, (req, res) => {
+app.delete('/api/produtos/:id', authMiddleware, async (req, res) => {
   try {
-    const db = readDB();
-    const index = db.produtos.findIndex((p) => p.id === req.params.id);
-
-    if (index === -1) {
+    const { rows } = await pool.query('SELECT * FROM produtos WHERE id = $1', [req.params.id]);
+    if (rows.length === 0) {
       return res.status(404).json({ error: 'Produto não encontrado' });
     }
 
-    const produto = db.produtos[index];
+    const produto = rows[0];
     if (produto.midias && produto.midias.length > 0) {
       produto.midias.forEach((mediaPath) => {
         const filename = path.basename(mediaPath);
@@ -315,8 +321,7 @@ app.delete('/api/produtos/:id', authMiddleware, (req, res) => {
       });
     }
 
-    db.produtos.splice(index, 1);
-    writeDB(db);
+    await pool.query('DELETE FROM produtos WHERE id = $1', [req.params.id]);
 
     res.json({ success: true, message: 'Produto removido com sucesso' });
   } catch (err) {
@@ -409,7 +414,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`CORS permitido para: ${ALLOWED_ORIGINS.join(', ')}`);
-});
+initDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando em http://localhost:${PORT}`);
+      console.log(`CORS permitido para: ${ALLOWED_ORIGINS.join(', ')}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Falha ao inicializar o banco de dados:', err);
+    process.exit(1);
+  });

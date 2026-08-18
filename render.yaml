@@ -4,7 +4,8 @@ services:
     runtime: node
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "node server/entry.js"
+    startCommand: "NODE_ENV=production node server/migrate.js && node server/entry.js"
+    healthCheckPath: /api/produtos
     envVars:
       - key: NODE_ENV
         value: production
