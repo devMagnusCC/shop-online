@@ -18,7 +18,7 @@ const pool = new pg.Pool(
       }
 );
 
-// Cria a tabela produtos se não existir.
+// Cria as tabelas produtos e midias se não existirem.
 // Chamado uma vez na subida do servidor (idempotente).
 export async function initDB() {
   await pool.query(`
@@ -32,6 +32,18 @@ export async function initDB() {
       link_compra TEXT NOT NULL DEFAULT '',
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
       updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
+
+  // Blobs de mídia persistidos no banco (imagens/vídeos dos produtos).
+  // nome = "<uuid>.<ext>" — mesmo formato do nome de arquivo antigo em /uploads,
+  // o que permite migrar os produtos trocando apenas o prefixo da URL.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS midias (
+      nome       TEXT PRIMARY KEY,
+      tipo       TEXT NOT NULL DEFAULT '',
+      dados      BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `);
 }

@@ -104,13 +104,7 @@ function validateImageMagic(bytes) {
   );
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${uuidv4()}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedExt = /\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|mov)$/i;
@@ -162,6 +156,20 @@ function isPathSafe(filename) {
     resolved.startsWith(UPLOADS_DIR)
   );
 }
+
+// Mapa de extensão → Content-Type. Mantenha sincronizado com src/constants/… se aplicável.
+// Nomes de arquivo são gerados como "<uuid>.<ext>" (ext minúscula), então o lookup é direto.
+const EXT_MIME = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mov: 'video/quicktime',
+};
 
 function isVideo(filename) {
   return /\.(mp4|webm|mov)$/i.test(filename);
@@ -310,15 +318,13 @@ app.delete('/api/produtos/:id', authMiddleware, async (req, res) => {
 
     const produto = rows[0];
     if (produto.midias && produto.midias.length > 0) {
-      produto.midias.forEach((mediaPath) => {
-        const filename = path.basename(mediaPath);
-        if (isPathSafe(filename)) {
-          const fullPath = path.join(UPLOADS_DIR, filename);
-          if (fs.existsSync(fullPath)) {
-            fs.unlinkSync(fullPath);
-          }
-        }
-      });
+      // Remove as mídias persistidas no banco e ainda referenciadas pelo produto
+      const nomes = produto.midias
+        .filter((mediaPath) => mediaPath.startsWith('/api/midia/'))
+        .map((mediaPath) => path.basename(mediaPath));
+      if (nomes.length > 0) {
+        await pool.query('DELETE FROM midias WHERE nome = ANY($1)', [nomes]);
+      }
     }
 
     await pool.query('DELETE FROM produtos WHERE id = $1', [req.params.id]);
@@ -332,7 +338,7 @@ app.delete('/api/produtos/:id', authMiddleware, async (req, res) => {
 
 // --- Upload routes ---
 app.post('/api/upload', authMiddleware, (req, res, next) => {
-  upload.array('midias', 20)(req, res, (err) => {
+  upload.array('midias', 20)(req, res, async (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
@@ -355,10 +361,8 @@ app.post('/api/upload', authMiddleware, (req, res, next) => {
       for (const file of req.files) {
         const ext = path.extname(file.originalname).toLowerCase();
         if (!isVideo(file.originalname) && ext !== '.svg') {
-          const buf = fs.readFileSync(file.path);
-          const header = buf.subarray(0, 4);
+          const header = file.buffer.subarray(0, 4);
           if (!validateImageMagic(header)) {
-            fs.unlinkSync(file.path);
             return res.status(400).json({
               error: `Arquivo "${file.originalname}" não é uma imagem válida`,
             });
@@ -366,8 +370,20 @@ app.post('/api/upload', authMiddleware, (req, res, next) => {
         }
       }
 
-      const paths = req.files.map((file) => `/uploads/${file.filename}`);
-      res.json({ success: true, data: paths });
+      // Persiste cada arquivo no banco (BYTEA) e devolve a URL pública
+      const urls = [];
+      for (const file of req.files) {
+        const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+        const nome = `${uuidv4()}.${ext}`;
+        const tipo = EXT_MIME[ext] || 'application/octet-stream';
+        await pool.query(
+          'INSERT INTO midias (nome, tipo, dados) VALUES ($1, $2, $3)',
+          [nome, tipo, file.buffer]
+        );
+        urls.push(`/api/midia/${nome}`);
+      }
+
+      res.json({ success: true, data: urls });
     } catch (err) {
       console.error('Erro ao processar upload:', err);
       res.status(500).json({ error: 'Erro ao fazer upload' });
@@ -375,28 +391,46 @@ app.post('/api/upload', authMiddleware, (req, res, next) => {
   });
 });
 
-app.delete('/api/upload/:filename', authMiddleware, (req, res) => {
+// Serve as mídias persistidas no banco (BYTEA). Rota pública.
+// As URLs armazenadas nos produtos são /api/midia/<nome>.
+app.get('/api/midia/:nome', async (req, res) => {
   try {
-    const { filename } = req.params;
+    const { nome } = req.params;
 
-    if (!isPathSafe(filename)) {
+    if (!isPathSafe(nome)) {
       return res.status(400).json({ error: 'Nome de arquivo inválido' });
     }
 
-    const fullPath = path.join(UPLOADS_DIR, filename);
-
-    if (!fullPath.startsWith(UPLOADS_DIR)) {
-      return res.status(400).json({ error: 'Caminho de arquivo inválido' });
+    const { rows } = await pool.query('SELECT dados, tipo FROM midias WHERE nome = $1', [nome]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Mídia não encontrada' });
     }
 
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
-    }
-
-    res.json({ success: true, message: 'Arquivo removido' });
+    const { dados, tipo } = rows[0];
+    res.set('Content-Type', tipo || 'application/octet-stream');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(dados);
   } catch (err) {
-    console.error('Erro ao remover arquivo:', err);
-    res.status(500).json({ error: 'Erro ao remover arquivo' });
+    console.error('Erro ao buscar mídia:', err);
+    res.status(500).json({ error: 'Erro ao buscar mídia' });
+  }
+});
+
+// Remove uma mídia persistida no banco (chamado ao remover do formulário).
+app.delete('/api/midia/:nome', authMiddleware, async (req, res) => {
+  try {
+    const { nome } = req.params;
+
+    if (!isPathSafe(nome)) {
+      return res.status(400).json({ error: 'Nome de arquivo inválido' });
+    }
+
+    await pool.query('DELETE FROM midias WHERE nome = $1', [nome]);
+
+    res.json({ success: true, message: 'Mídia removida' });
+  } catch (err) {
+    console.error('Erro ao remover mídia:', err);
+    res.status(500).json({ error: 'Erro ao remover mídia' });
   }
 });
 

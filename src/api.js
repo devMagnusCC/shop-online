@@ -33,7 +33,7 @@ export const uploadImagens = (files) => {
 };
 
 export const deleteImagem = (filename) =>
-  api.delete(`/upload/${filename}`).then((r) => r.data);
+  api.delete(`/midia/${filename}`).then((r) => r.data);
 
 // Auth
 export const login = (username, password) =>
